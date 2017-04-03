@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/decred/dcrd/blockchain"
+	//"github.com/decred/dcrd/blockchain"
 	"github.com/decred/dcrd/chaincfg"
 	"github.com/decred/dcrd/chaincfg/chainhash"
 
@@ -279,27 +279,27 @@ func (d *Device) foundCandidate(ts, nonce0, nonce1 uint32) {
 
 	// Hashes that reach this logic and fail the minimal proof of
 	// work check are considered to be hardware errors.
-	hashNum := blockchain.HashToBig(&hash)
-	if hashNum.Cmp(chainParams.PowLimit) > 0 {
-		minrLog.Errorf("DEV #%d Hardware error found, hash %v above "+
-			"minimum target %064x", d.index, hash, d.work.Target.Bytes())
-		d.invalidShares++
-		return
-	}
+	//hashNum := blockchain.HashToBig(&hash)
+	// if hashNum.Cmp(chainParams.PowLimit) > 0 {
+	// 	minrLog.Errorf("DEV #%d Hardware error found, hash %v above "+
+	// 		"minimum target %064x", d.index, hash, d.work.Target.Bytes())
+	// 	d.invalidShares++
+	// 	return
+	// }
 
 	d.allDiffOneShares++
 
 	if !cfg.Benchmark {
 		// Assess versus the pool or daemon target.
-		if hashNum.Cmp(d.work.Target) > 0 {
-			minrLog.Debugf("DEV #%d Hash %v bigger than target %032x (boo)",
-				d.index, hash, d.work.Target.Bytes())
-		} else {
+		// if hashNum.Cmp(d.work.Target) > 0 {
+		// 	minrLog.Debugf("DEV #%d Hash %v bigger than target %032x (boo)",
+		// 		d.index, hash, d.work.Target.Bytes())
+		// } else {
 			minrLog.Infof("DEV #%d Found hash with work below target! %v (yay)",
 				d.index, hash)
 			d.validShares++
 			d.workDone <- data
-		}
+		//}
 	}
 }
 

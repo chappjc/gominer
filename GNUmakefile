@@ -1,6 +1,6 @@
-CC ?= gcc -fPIC
-CXX ?= g++ -fPIC
-NVCC ?= nvcc -Xcompiler -fPIC
+CC ?= gcc5 -fPIC -L/opt/cuda/lib64
+CXX ?= g++5 -fPIC -L/opt/cuda/lib64
+NVCC ?= nvcc -gencode arch=compute_20,code=sm_21 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -gencode arch=compute_50,code=sm_50 -gencode arch=compute_52,code=compute_52 -gencode arch=compute_61,code=sm_61 -D_FORCE_INLINES -Xcompiler -fPIC -L/opt/cuda/lib64 -std=c++11
 AR ?= ar
 # -o is gnu only so this needs to be smarter; it does work because on darwin it
 #  fails which is also not windows.
@@ -34,7 +34,7 @@ obj/decred.dll: obj sph/blake.c decred.cu
 	$(NVCC) --shared --optimize=3 --compiler-options=-GS-,-MD -I. -Isph decred.cu sph/blake.c -o obj/decred.dll
 else
 obj/decred.a: obj sph/blake.c decred.cu
-	$(NVCC) --lib --optimize=3 -I. decred.cu sph/blake.c -o obj/decred.a
+	$(NVCC) -L/opt/cuda/lib64 --lib --optimize=3 -I. decred.cu sph/blake.c -o obj/decred.a
 endif
 
 ifeq ($(ARCH),Msys)
