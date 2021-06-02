@@ -1,5 +1,7 @@
 module github.com/decred/gominer
 
+go 1.15
+
 require (
 	github.com/barnex/cuda5 v0.0.0-20171012184954-da30a9b287d8
 	github.com/davecgh/go-spew v1.1.1
@@ -13,5 +15,3 @@ require (
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/jrick/logrotate v1.0.0
 )
-
-go 1.12

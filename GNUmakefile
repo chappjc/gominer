@@ -1,4 +1,4 @@
-CC ?= gcc -fPIC
+CC ?= gcc -fPIC -march=native -O3
 CXX ?= g++ -fPIC
 NVCC ?= nvcc -Xcompiler -fPIC
 AR ?= ar

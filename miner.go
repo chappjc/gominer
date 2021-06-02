@@ -30,8 +30,8 @@ type Miner struct {
 func NewMiner() (*Miner, error) {
 	m := &Miner{
 		workDone:         make(chan []byte, 10),
-		quit:             make(chan struct{}),
-		needsWorkRefresh: make(chan struct{}),
+		quit:             make(chan struct{}, 8),
+		needsWorkRefresh: make(chan struct{}, 8),
 	}
 
 	m.devices = make([]*Device, 0)
@@ -82,7 +82,11 @@ func (m *Miner) workSubmitThread() {
 						atomic.AddUint64(&m.invalidShares, 1)
 					}
 
-					m.needsWorkRefresh <- struct{}{}
+					select {
+					case <-m.quit:
+						return
+					case m.needsWorkRefresh <- struct{}{}:
+					}
 				}
 			} else {
 				submitted, err := GetPoolWorkSubmit(data, m.pool)
@@ -101,7 +105,11 @@ func (m *Miner) workSubmitThread() {
 						minrLog.Debugf("Submitted work to pool successfully: %v",
 							submitted)
 					}
-					m.needsWorkRefresh <- struct{}{}
+					select {
+					case <-m.quit:
+						return
+					case m.needsWorkRefresh <- struct{}{}:
+					}
 				}
 			}
 		}
@@ -192,7 +200,6 @@ func (m *Miner) printStatsThread() {
 		case <-m.quit:
 			return
 		case <-t.C:
-		case <-m.needsWorkRefresh:
 		}
 	}
 }

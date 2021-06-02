@@ -185,7 +185,7 @@ func ListDevices() {
 	// Because mumux3/3/cuda/cu likes to panic instead of error.
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("No CUDA Capable GPUs present")
+			fmt.Println("No CUDA Capable GPUs present", r)
 		}
 	}()
 	devices, _ := getCUDevices()
@@ -194,8 +194,7 @@ func ListDevices() {
 	}
 }
 
-func NewCuDevice(index int, order int, deviceID cu.Device,
-	workDone chan []byte) (*Device, error) {
+func NewCuDevice(index int, order int, deviceID cu.Device, workDone chan []byte) (*Device, error) {
 
 	d := &Device{
 		index:       index,
@@ -308,12 +307,6 @@ func (d *Device) runDevice() error {
 	for {
 		d.updateCurrentWork()
 
-		select {
-		case <-d.quit:
-			return nil
-		default:
-		}
-
 		// Increment extraNonce.
 		util.RolloverExtraNonce(&d.extraNonce)
 		d.lastBlock[work.Nonce1Word] = util.Uint32EndiannessSwap(d.extraNonce)
@@ -382,11 +375,10 @@ func (d *Device) runDevice() error {
 }
 
 func minUint32(a, b uint32) uint32 {
-	if a > b {
+	if a < b {
 		return a
-	} else {
-		return b
 	}
+	return b
 }
 
 func newMinerDevs(m *Miner) (*Miner, int, error) {

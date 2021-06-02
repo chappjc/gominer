@@ -275,7 +275,7 @@ func (d *Device) foundCandidate(ts, nonce0, nonce1 uint32) {
 	binary.BigEndian.PutUint32(data[128+4*work.TimestampWord:], ts)
 	binary.BigEndian.PutUint32(data[128+4*work.Nonce0Word:], nonce0)
 	binary.BigEndian.PutUint32(data[128+4*work.Nonce1Word:], nonce1)
-	hash := chainhash.HashH(data[0:180])
+	hash := chainhash.HashH(data[:180])
 
 	// Hashes that reach this logic and fail the minimal proof of
 	// work check are considered to be hardware errors.
@@ -298,7 +298,11 @@ func (d *Device) foundCandidate(ts, nonce0, nonce1 uint32) {
 			minrLog.Infof("DEV #%d Found hash with work below target! %v (yay)",
 				d.index, hash)
 			d.validShares++
-			d.workDone <- data
+			select {
+			case d.workDone <- data:
+			case <-d.quit:
+				return
+			}
 		}
 	}
 }
@@ -308,7 +312,10 @@ func (d *Device) Stop() {
 }
 
 func (d *Device) SetWork(w *work.Work) {
-	d.newWork <- w
+	select {
+	case d.newWork <- w:
+	case <-d.quit:
+	}
 }
 
 func (d *Device) PrintStats() {
