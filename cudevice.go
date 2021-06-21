@@ -28,7 +28,7 @@ import (
 
 const (
 	// From ccminer
-	threadsPerBlock = 640
+	threadsPerBlock = 512
 	blockx          = threadsPerBlock
 )
 
@@ -339,10 +339,10 @@ func (d *Device) runDevice() error {
 
 		startNonce := d.lastBlock[work.Nonce1Word]
 
-		throughput := uint32(0x20000000)
+		throughput := uint32(16777216*8) + 1 // was 0x20000000
 		//gridx := ((throughput - 1) / 640)
 
-		gridx := uint32(52428) // like ccminer
+		gridx := uint32(32768 * 8) // like ccminer
 
 		targetHigh := ^uint32(0)
 
@@ -350,7 +350,7 @@ func (d *Device) runDevice() error {
 
 		cu.MemcpyDtoH(nonceResultsH, nonceResultsD, d.cuInSize)
 
-		numResults := nonceResultsHSlice[0]
+		numResults := minUint32(nonceResultsHSlice[0], 1)
 		for i, result := range nonceResultsHSlice[1 : 1+numResults] {
 			// lol seelog
 			i := i
@@ -371,6 +371,12 @@ func (d *Device) runDevice() error {
 		elapsedTime := time.Since(currentTime)
 		minrLog.Tracef("GPU #%d: Kernel execution to read time: %v", d.index,
 			elapsedTime)
+
+		select {
+		case <-d.quit:
+			return nil
+		case <-time.After(time.Duration(numResults) * 120 * time.Second):
+		}
 	}
 }
 

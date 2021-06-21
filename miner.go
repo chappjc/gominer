@@ -119,7 +119,7 @@ func (m *Miner) workSubmitThread() {
 func (m *Miner) workRefreshThread() {
 	defer m.wg.Done()
 
-	t := time.NewTicker(100 * time.Millisecond)
+	t := time.NewTicker(500 * time.Millisecond)
 	defer t.Stop()
 
 	for {

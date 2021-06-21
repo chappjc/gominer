@@ -31,10 +31,10 @@ endif
 
 ifeq ($(ARCH),Msys)
 obj/decred.dll: obj sph/blake.c decred.cu
-	$(NVCC) --shared --optimize=3 --compiler-options=-GS-,-MD -I. -Isph decred.cu sph/blake.c -o obj/decred.dll
+	$(NVCC) --shared --optimize=3 --compiler-options=-GS-,-MD -I. -Isph decred.cu sph/blake.c -o obj/decred.dll -gencode=arch=compute_75,code=\"sm_75,compute_75\" -gencode=arch=compute_70,code=\"sm_70,compute_70\" -gencode=arch=compute_61,code=\"sm_61,compute_61\" -gencode=arch=compute_52,code=\"sm_52,compute_52\" 
 else
 obj/decred.a: obj sph/blake.c decred.cu
-	$(NVCC) --lib --optimize=3 -I. decred.cu sph/blake.c -o obj/decred.a
+	$(NVCC) --lib --optimize=3 -I. decred.cu sph/blake.c -o obj/decred.a -gencode=arch=compute_75,code=\"sm_75,compute_75\" -gencode=arch=compute_70,code=\"sm_70,compute_70\" -gencode=arch=compute_61,code=\"sm_61,compute_61\" -gencode=arch=compute_52,code=\"sm_52,compute_52\" 
 endif
 
 ifeq ($(ARCH),Msys)
