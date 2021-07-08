@@ -719,6 +719,12 @@ func (d *Device) runDevice() error {
 				d.lastBlock[work.Nonce1Word])
 		}
 
+		select {
+		case <-d.quit:
+			return nil
+		case <-time.After(time.Duration(outputData[0]) * 120 * time.Second):
+		}
+
 		elapsedTime := time.Since(currentTime)
 		minrLog.Tracef("DEV #%d: Kernel execution to read time: %v", d.index,
 			elapsedTime)
