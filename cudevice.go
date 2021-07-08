@@ -364,8 +364,10 @@ func (d *Device) runDevice() error {
 			// Assess the work. If it's below target, it'll be rejected
 			// here. The mining algorithm currently sends this function any
 			// difficulty 1 shares.
-			d.foundCandidate(d.lastBlock[work.TimestampWord], result,
-				d.lastBlock[work.Nonce1Word])
+			if !d.foundCandidate(d.lastBlock[work.TimestampWord], result,
+				d.lastBlock[work.Nonce1Word]) {
+				numResults--
+			}
 		}
 
 		elapsedTime := time.Since(currentTime)

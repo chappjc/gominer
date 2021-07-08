@@ -265,7 +265,7 @@ func (d *Device) fanControlSupported(kind string) bool {
 	return false
 }
 
-func (d *Device) foundCandidate(ts, nonce0, nonce1 uint32) {
+func (d *Device) foundCandidate(ts, nonce0, nonce1 uint32) bool {
 	d.Lock()
 	defer d.Unlock()
 	// Construct the final block header.
@@ -284,7 +284,7 @@ func (d *Device) foundCandidate(ts, nonce0, nonce1 uint32) {
 		minrLog.Errorf("DEV #%d Hardware error found, hash %v above "+
 			"minimum target %064x", d.index, hash, d.work.Target.Bytes())
 		d.invalidShares++
-		return
+		return false
 	}
 
 	d.allDiffOneShares++
@@ -301,10 +301,12 @@ func (d *Device) foundCandidate(ts, nonce0, nonce1 uint32) {
 			select {
 			case d.workDone <- data:
 			case <-d.quit:
-				return
+				return true // it was fine, there's just no receiver when shutting down
 			}
 		}
 	}
+
+	return true
 }
 
 func (d *Device) Stop() {

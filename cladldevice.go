@@ -551,7 +551,8 @@ func (d *Device) runDevice() error {
 			return clError(status, "CLEnqueueReadBuffer")
 		}
 
-		for i := uint32(0); i < outputData[0]; i++ {
+		numResults := int(outputData[0])
+		for i := 0; i < numResults; i++ {
 			minrLog.Debugf("DEV #%d: Found candidate %v nonce %08x, "+
 				"extraNonce %08x, workID %08x, timestamp %08x",
 				d.index, i+1, outputData[i+1], d.lastBlock[work.Nonce1Word],
@@ -561,13 +562,21 @@ func (d *Device) runDevice() error {
 			// Assess the work. If it's below target, it'll be rejected
 			// here. The mining algorithm currently sends this function any
 			// difficulty 1 shares.
-			d.foundCandidate(d.lastBlock[work.TimestampWord], outputData[i+1],
-				d.lastBlock[work.Nonce1Word])
+			if !d.foundCandidate(d.lastBlock[work.TimestampWord], outputData[i+1],
+				d.lastBlock[work.Nonce1Word]) {
+				numResults--
+			}
 		}
 
 		elapsedTime := time.Since(currentTime)
 		minrLog.Tracef("DEV #%d: Kernel execution to read time: %v", d.index,
 			elapsedTime)
+
+		select {
+		case <-d.quit:
+			return nil
+		case <-time.After(time.Duration(numResults) * 120 * time.Second):
+		}
 	}
 }
 
